@@ -4,199 +4,150 @@ import './App.css'
 const API_URL = 'https://69829b249c3efeb892a2bfb9.mockapi.io/api/sinhvien/sinhvien'
 
 function App() {
-  const [students, setStudents] = useState([])
+  const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
+  const [formData, setFormData] = useState({ Name: '', Avatar: '', Phone: '' })
   const [editingId, setEditingId] = useState(null)
 
-  // Read - Get all students
-  const fetchStudents = async () => {
+  // Read - Get all items
+  const fetchItems = async () => {
     setLoading(true)
     try {
-      const response = await fetch(API_URL)
-      const data = await response.json()
-      setStudents(data)
-    } catch (error) {
-      console.error('Error fetching students:', error)
+      const res = await fetch(API_URL)
+      const data = await res.json()
+      setItems(data)
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      alert('Lỗi khi tải dữ liệu')
     } finally {
       setLoading(false)
     }
   }
 
-  // Create - Add new student
-  const addStudent = async (e) => {
+  // Create
+  const createItem = async (e) => {
     e.preventDefault()
-    if (!formData.mssv || !formData.ho || !formData.ten) {
-      alert('Vui lòng điền MSSV, Họ và Tên')
-      return
-    }
+    if (!formData.Name) return alert('Vui lòng nhập tên')
 
     try {
-      const response = await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
-      const newStudent = await response.json()
-      setStudents([...students, newStudent])
-      setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
-    } catch (error) {
-      console.error('Error adding student:', error)
+      const newItem = await res.json()
+      setItems(prev => [...prev, newItem])
+      setFormData({ Name: '', Avatar: '', Phone: '' })
+    } catch (err) {
+      console.error('Error creating item:', err)
+      alert('Lỗi khi tạo mục mới')
     }
   }
 
-  // Update - Edit student
-  const updateStudent = async (e) => {
+  // Update
+  const updateItem = async (e) => {
     e.preventDefault()
-    if (!formData.mssv || !formData.ho || !formData.ten) {
-      alert('Vui lòng điền MSSV, Họ và Tên')
-      return
-    }
-
+    if (!editingId) return
     try {
-      const response = await fetch(`${API_URL}/${editingId}`, {
+      const res = await fetch(`${API_URL}/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
-      const updatedStudent = await response.json()
-      setStudents(students.map(s => s.id === editingId ? updatedStudent : s))
-      setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
+      const updated = await res.json()
+      setItems(prev => prev.map(i => i.id === editingId ? updated : i))
       setEditingId(null)
-    } catch (error) {
-      console.error('Error updating student:', error)
+      setFormData({ Name: '', Avatar: '', Phone: '' })
+    } catch (err) {
+      console.error('Error updating item:', err)
+      alert('Lỗi khi cập nhật')
     }
   }
 
-  // Delete - Remove student
-  const deleteStudent = async (id) => {
-    if (!confirm('Are you sure you want to delete this student?')) return
-    
+  // Delete
+  const deleteItem = async (id) => {
+    if (!confirm('Bạn có chắc muốn xóa mục này không?')) return
     try {
       await fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-      setStudents(students.filter(s => s.id !== id))
-    } catch (error) {
-      console.error('Error deleting student:', error)
+      setItems(prev => prev.filter(i => i.id !== id))
+    } catch (err) {
+      console.error('Error deleting item:', err)
+      alert('Lỗi khi xóa')
     }
   }
 
-  // Edit - Prepare form for editing
-  const handleEdit = (student) => {
-    setFormData({ mssv: student.mssv, ho: student.ho, ten: student.ten, lop: student.lop || '', diem1: student.diem1 || '', diem2: student.diem2 || '' })
-    setEditingId(student.id)
+  const handleEdit = (item) => {
+    setFormData({ Name: item.Name || '', Avatar: item.Avatar || '', Phone: item.Phone || '' })
+    setEditingId(item.id)
   }
 
-  // Reset form
   const handleCancel = () => {
-    setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
+    setFormData({ Name: '', Avatar: '', Phone: '' })
     setEditingId(null)
   }
 
-  // Load students on component mount
-  useEffect(() => {
-    fetchStudents()
-  }, [])
+  useEffect(() => { fetchItems() }, [])
 
   return (
     <div className="app-container">
-      <h1>👨‍🎓 Student Management System</h1>
+      <h1>CRUD Demo — MockAPI</h1>
 
-      {/* Form */}
       <div className="form-section">
-        <h2>{editingId ? 'Chỉnh sửa sinh viên' : 'Thêm sinh viên mới'}</h2>
-        <form onSubmit={editingId ? updateStudent : addStudent}>
+        <h2>{editingId ? 'Chỉnh sửa mục' : 'Thêm mục mới'}</h2>
+        <form onSubmit={editingId ? updateItem : createItem}>
           <input
             type="text"
-            placeholder="MSSV"
-            value={formData.mssv}
-            onChange={(e) => setFormData({ ...formData, mssv: e.target.value })}
+            placeholder="Name"
+            value={formData.Name}
+            onChange={e => setFormData({ ...formData, Name: e.target.value })}
             required
           />
           <input
-            type="text"
-            placeholder="Họ"
-            value={formData.ho}
-            onChange={(e) => setFormData({ ...formData, ho: e.target.value })}
-            required
+            type="url"
+            placeholder="Avatar URL"
+            value={formData.Avatar}
+            onChange={e => setFormData({ ...formData, Avatar: e.target.value })}
           />
           <input
             type="text"
-            placeholder="Tên"
-            value={formData.ten}
-            onChange={(e) => setFormData({ ...formData, ten: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Lớp"
-            value={formData.lop}
-            onChange={(e) => setFormData({ ...formData, lop: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Điểm 1"
-            value={formData.diem1}
-            onChange={(e) => setFormData({ ...formData, diem1: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Điểm 2"
-            value={formData.diem2}
-            onChange={(e) => setFormData({ ...formData, diem2: e.target.value })}
+            placeholder="Phone"
+            value={formData.Phone}
+            onChange={e => setFormData({ ...formData, Phone: e.target.value })}
           />
           <div className="button-group">
-            <button type="submit" className="btn-submit">
-              {editingId ? '✏️ Cập nhật' : '➕ Thêm'}
-            </button>
-            {editingId && (
-              <button type="button" className="btn-cancel" onClick={handleCancel}>
-                ❌ Hủy
-              </button>
-            )}
+            <button type="submit" className="btn-submit">{editingId ? 'Cập nhật' : 'Thêm'}</button>
+            {editingId && <button type="button" className="btn-cancel" onClick={handleCancel}>Hủy</button>}
           </div>
         </form>
       </div>
 
-      {/* Students List */}
       <div className="list-section">
-        <h2>Danh sách sinh viên ({students.length})</h2>
-        <button onClick={fetchStudents} className="btn-refresh" disabled={loading}>
-          {loading ? '⏳ Đang tải...' : '🔄 Làm mới'}
-        </button>
+        <h2>Danh sách ({items.length})</h2>
+        <button onClick={fetchItems} className="btn-refresh" disabled={loading}>{loading ? 'Đang tải...' : 'Làm mới'}</button>
 
-        {students.length === 0 ? (
-          <p className="no-data">Không có dữ liệu sinh viên</p>
+        {items.length === 0 ? (
+          <p className="no-data">Không có dữ liệu</p>
         ) : (
           <table className="students-table">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>MSSV</th>
-                <th>Họ</th>
-                <th>Tên</th>
-                <th>Lớp</th>
-                <th>Điểm 1</th>
-                <th>Điểm 2</th>
-                <th>Thao tác</th>
+                <th>Avatar</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
-                <tr key={student.id}>
-                  <td>{student.id}</td>
-                  <td>{student.mssv}</td>
-                  <td>{student.ho}</td>
-                  <td>{student.ten}</td>
-                  <td>{student.lop || '-'}</td>
-                  <td>{student.diem1 || '-'}</td>
-                  <td>{student.diem2 || '-'}</td>
+              {items.map(item => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{item.Avatar ? <img src={item.Avatar} alt={item.Name} style={{width:48,height:48,borderRadius:6}}/> : '-'}</td>
+                  <td>{item.Name}</td>
+                  <td>{item.Phone}</td>
                   <td className="actions">
-                    <button className="btn-edit" onClick={() => handleEdit(student)}>
-                      ✏️ Sửa
-                    </button>
-                    <button className="btn-delete" onClick={() => deleteStudent(student.id)}>
-                      🗑️ Xóa
-                    </button>
+                    <button className="btn-edit" onClick={() => handleEdit(item)}>Sửa</button>
+                    <button className="btn-delete" onClick={() => deleteItem(item.id)}>Xóa</button>
                   </td>
                 </tr>
               ))}
