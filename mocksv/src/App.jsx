@@ -6,7 +6,7 @@ const API_URL = 'https://69829b249c3efeb892a2bfb9.mockapi.io/api/sinhvien/sinhvi
 function App() {
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({ Name: '', Phone: '', Avatar: '' })
+  const [formData, setFormData] = useState({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
   const [editingId, setEditingId] = useState(null)
 
   // Read - Get all students
@@ -26,8 +26,8 @@ function App() {
   // Create - Add new student
   const addStudent = async (e) => {
     e.preventDefault()
-    if (!formData.Name || !formData.Phone) {
-      alert('Vui lòng điền tên và số điện thoại')
+    if (!formData.mssv || !formData.ho || !formData.ten) {
+      alert('Vui lòng điền MSSV, Họ và Tên')
       return
     }
 
@@ -39,7 +39,7 @@ function App() {
       })
       const newStudent = await response.json()
       setStudents([...students, newStudent])
-      setFormData({ Name: '', Phone: '', Avatar: '' })
+      setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
     } catch (error) {
       console.error('Error adding student:', error)
     }
@@ -48,8 +48,8 @@ function App() {
   // Update - Edit student
   const updateStudent = async (e) => {
     e.preventDefault()
-    if (!formData.Name || !formData.Phone) {
-      alert('Vui lòng điền tên và số điện thoại')
+    if (!formData.mssv || !formData.ho || !formData.ten) {
+      alert('Vui lòng điền MSSV, Họ và Tên')
       return
     }
 
@@ -61,7 +61,7 @@ function App() {
       })
       const updatedStudent = await response.json()
       setStudents(students.map(s => s.id === editingId ? updatedStudent : s))
-      setFormData({ Name: '', Phone: '', Avatar: '' })
+      setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
       setEditingId(null)
     } catch (error) {
       console.error('Error updating student:', error)
@@ -82,13 +82,13 @@ function App() {
 
   // Edit - Prepare form for editing
   const handleEdit = (student) => {
-    setFormData({ Name: student.Name, Phone: student.Phone || '', Avatar: student.Avatar || '' })
+    setFormData({ mssv: student.mssv, ho: student.ho, ten: student.ten, lop: student.lop || '', diem1: student.diem1 || '', diem2: student.diem2 || '' })
     setEditingId(student.id)
   }
 
   // Reset form
   const handleCancel = () => {
-    setFormData({ Name: '', Phone: '', Avatar: '' })
+    setFormData({ mssv: '', ho: '', ten: '', lop: '', diem1: '', diem2: '' })
     setEditingId(null)
   }
 
@@ -107,23 +107,42 @@ function App() {
         <form onSubmit={editingId ? updateStudent : addStudent}>
           <input
             type="text"
-            placeholder="Tên sinh viên"
-            value={formData.Name}
-            onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+            placeholder="MSSV"
+            value={formData.mssv}
+            onChange={(e) => setFormData({ ...formData, mssv: e.target.value })}
             required
           />
           <input
-            type="tel"
-            placeholder="Số điện thoại"
-            value={formData.Phone}
-            onChange={(e) => setFormData({ ...formData, Phone: e.target.value })}
+            type="text"
+            placeholder="Họ"
+            value={formData.ho}
+            onChange={(e) => setFormData({ ...formData, ho: e.target.value })}
             required
           />
           <input
-            type="url"
-            placeholder="URL ảnh đại diện"
-            value={formData.Avatar}
-            onChange={(e) => setFormData({ ...formData, Avatar: e.target.value })}
+            type="text"
+            placeholder="Tên"
+            value={formData.ten}
+            onChange={(e) => setFormData({ ...formData, ten: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Lớp"
+            value={formData.lop}
+            onChange={(e) => setFormData({ ...formData, lop: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Điểm 1"
+            value={formData.diem1}
+            onChange={(e) => setFormData({ ...formData, diem1: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Điểm 2"
+            value={formData.diem2}
+            onChange={(e) => setFormData({ ...formData, diem2: e.target.value })}
           />
           <div className="button-group">
             <button type="submit" className="btn-submit">
@@ -152,9 +171,12 @@ function App() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Ảnh</th>
-                <th>Tên sinh viên</th>
-                <th>Số điện thoại</th>
+                <th>MSSV</th>
+                <th>Họ</th>
+                <th>Tên</th>
+                <th>Lớp</th>
+                <th>Điểm 1</th>
+                <th>Điểm 2</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -162,11 +184,12 @@ function App() {
               {students.map((student) => (
                 <tr key={student.id}>
                   <td>{student.id}</td>
-                  <td className="avatar-cell">
-                    <img src={student.Avatar} alt={student.Name} className="table-avatar" />
-                  </td>
-                  <td>{student.Name}</td>
-                  <td>{student.Phone}</td>
+                  <td>{student.mssv}</td>
+                  <td>{student.ho}</td>
+                  <td>{student.ten}</td>
+                  <td>{student.lop || '-'}</td>
+                  <td>{student.diem1 || '-'}</td>
+                  <td>{student.diem2 || '-'}</td>
                   <td className="actions">
                     <button className="btn-edit" onClick={() => handleEdit(student)}>
                       ✏️ Sửa
