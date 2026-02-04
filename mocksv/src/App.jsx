@@ -104,6 +104,7 @@ function App() {
         <li>DH52200842 Nguyễn Hữu Khang D22_TH13</li>
         <li>DH52200867 Đậu Quốc Khánh D22_TH13 </li>
         <li>DH52201216 Trần Tuấn Phong D22_TH13</li>
+        <li>DH52200870 Lê Minh Khánh D22_TH13  </li>
       </ul>
       <h1>CRUD Demo — MockAPI</h1>
 
